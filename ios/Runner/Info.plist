@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>fly folio</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -11,17 +13,67 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>flutter_gmaps</string>
+	<string>fly folio</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <!--FF_REVERSED_CLIENT_ID-->
+                
+            </array>
+        </dict>
+
+        <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLName</key>
+        <string>flyfolio.com</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+        <string>flyfolio</string>
+        </array>
+        </dict>
+    </array>
+    <key>FlutterDeepLinkingEnabled</key>
+    <true/>
+
+
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>In order to search nearby, this app requires access to your current location.</string>
+
+
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>comgooglemaps</string>
+      <string>baidumap</string>
+      <string>iosamap</string>
+      <string>waze</string>
+      <string>yandexmaps</string>
+      <string>yandexnavi</string>
+      <string>citymapper</string>
+      <string>mapswithme</string>
+      <string>osmandmaps</string>
+      <string>dgis</string>
+      <string>qqmap</string>
+      <string>here-location</string>
+
+    </array>
+
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -41,5 +93,6 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+
 </dict>
 </plist>

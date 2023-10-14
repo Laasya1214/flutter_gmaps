@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "955833773201",
+    "project_id": "fly-folio-1-6518e",
+    "storage_bucket": "fly-folio-1-6518e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955833773201:android:f16c90da64ab0e77a5e330",
+        "android_client_info": {
+          "package_name": "com.mycompany.flyfolio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmjF4e2qj3tPHtH3H2YRLdLEL18tc0buU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

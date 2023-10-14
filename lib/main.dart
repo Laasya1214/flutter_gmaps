@@ -1,193 +1,93 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gmaps/directions_model.dart';
-import 'package:flutter_gmaps/directions_repository.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-void main() {
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'auth/firebase_auth/firebase_user_provider.dart';
+import 'auth/firebase_auth/auth_util.dart';
+
+import 'backend/firebase/firebase_config.dart';
+import 'flutter_flow/flutter_flow_theme.dart';
+import 'flutter_flow/flutter_flow_util.dart';
+import 'flutter_flow/internationalization.dart';
+import 'flutter_flow/nav/nav.dart';
+import 'index.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  usePathUrlStrategy();
+  await initFirebase();
+
+  await FlutterFlowTheme.initialize();
+
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+
+  static _MyAppState of(BuildContext context) =>
+      context.findAncestorStateOfType<_MyAppState>()!;
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale? _locale;
+  ThemeMode _themeMode = FlutterFlowTheme.themeMode;
+
+  late Stream<BaseAuthUser> userStream;
+
+  late AppStateNotifier _appStateNotifier;
+  late GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _appStateNotifier = AppStateNotifier.instance;
+    _router = createRouter(_appStateNotifier);
+    userStream = flyFolioFirebaseUserStream()
+      ..listen((user) => _appStateNotifier.update(user));
+    jwtTokenStream.listen((_) {});
+    Future.delayed(
+      Duration(milliseconds: 1000),
+      () => _appStateNotifier.stopShowingSplashImage(),
+    );
+  }
+
+  void setLocale(String language) {
+    setState(() => _locale = createLocale(language));
+  }
+
+  void setThemeMode(ThemeMode mode) => setState(() {
+        _themeMode = mode;
+        FlutterFlowTheme.saveThemeMode(mode);
+      });
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Google Maps',
-      debugShowCheckedModeBanner: false,
+    return MaterialApp.router(
+      title: 'fly folio',
+      localizationsDelegates: [
+        FFLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      locale: _locale,
+      supportedLocales: const [Locale('en', '')],
       theme: ThemeData(
-        primaryColor: Colors.white,
+        brightness: Brightness.light,
+        scrollbarTheme: ScrollbarThemeData(),
       ),
-      home: MapScreen(),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        scrollbarTheme: ScrollbarThemeData(),
+      ),
+      themeMode: _themeMode,
+      routerConfig: _router,
     );
-  }
-}
-
-class MapScreen extends StatefulWidget {
-  @override
-  _MapScreenState createState() => _MapScreenState();
-}
-
-class _MapScreenState extends State<MapScreen> {
-  static const _initialCameraPosition = CameraPosition(
-    target: LatLng(37.773972, -122.431297),
-    zoom: 11.5,
-  );
-
-  GoogleMapController _googleMapController;
-  Marker _origin;
-  Marker _destination;
-  Directions _info;
-
-  @override
-  void dispose() {
-    _googleMapController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        title: const Text('Google Maps'),
-        actions: [
-          if (_origin != null)
-            TextButton(
-              onPressed: () => _googleMapController.animateCamera(
-                CameraUpdate.newCameraPosition(
-                  CameraPosition(
-                    target: _origin.position,
-                    zoom: 14.5,
-                    tilt: 50.0,
-                  ),
-                ),
-              ),
-              style: TextButton.styleFrom(
-                primary: Colors.green,
-                textStyle: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              child: const Text('ORIGIN'),
-            ),
-          if (_destination != null)
-            TextButton(
-              onPressed: () => _googleMapController.animateCamera(
-                CameraUpdate.newCameraPosition(
-                  CameraPosition(
-                    target: _destination.position,
-                    zoom: 14.5,
-                    tilt: 50.0,
-                  ),
-                ),
-              ),
-              style: TextButton.styleFrom(
-                primary: Colors.blue,
-                textStyle: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              child: const Text('DEST'),
-            )
-        ],
-      ),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          GoogleMap(
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            initialCameraPosition: _initialCameraPosition,
-            onMapCreated: (controller) => _googleMapController = controller,
-            markers: {
-              if (_origin != null) _origin,
-              if (_destination != null) _destination
-            },
-            polylines: {
-              if (_info != null)
-                Polyline(
-                  polylineId: const PolylineId('overview_polyline'),
-                  color: Colors.red,
-                  width: 5,
-                  points: _info.polylinePoints
-                      .map((e) => LatLng(e.latitude, e.longitude))
-                      .toList(),
-                ),
-            },
-            onLongPress: _addMarker,
-          ),
-          if (_info != null)
-            Positioned(
-              top: 20.0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 6.0,
-                  horizontal: 12.0,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.yellowAccent,
-                  borderRadius: BorderRadius.circular(20.0),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 6.0,
-                    )
-                  ],
-                ),
-                child: Text(
-                  '${_info.totalDistance}, ${_info.totalDuration}',
-                  style: const TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.black,
-        onPressed: () => _googleMapController.animateCamera(
-          _info != null
-              ? CameraUpdate.newLatLngBounds(_info.bounds, 100.0)
-              : CameraUpdate.newCameraPosition(_initialCameraPosition),
-        ),
-        child: const Icon(Icons.center_focus_strong),
-      ),
-    );
-  }
-
-  void _addMarker(LatLng pos) async {
-    if (_origin == null || (_origin != null && _destination != null)) {
-      // Origin is not set OR Origin/Destination are both set
-      // Set origin
-      setState(() {
-        _origin = Marker(
-          markerId: const MarkerId('origin'),
-          infoWindow: const InfoWindow(title: 'Origin'),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-          position: pos,
-        );
-        // Reset destination
-        _destination = null;
-
-        // Reset info
-        _info = null;
-      });
-    } else {
-      // Origin is already set
-      // Set destination
-      setState(() {
-        _destination = Marker(
-          markerId: const MarkerId('destination'),
-          infoWindow: const InfoWindow(title: 'Destination'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-          position: pos,
-        );
-      });
-
-      // Get directions
-      final directions = await DirectionsRepository()
-          .getDirections(origin: _origin.position, destination: pos);
-      setState(() => _info = directions);
-    }
   }
 }
